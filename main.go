@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SongDetail — структура, соответствующая схеме ответа внешнего API
 type SongDetail struct {
 	ReleaseDate string `json:"releaseDate"` // например, "16.07.2006"
 	Text        string `json:"text"`
@@ -45,36 +44,30 @@ You set my soul alight`,
 func main() {
 	router := gin.Default()
 
-	// GET /info?group=...&song=...
 	router.GET("/info", func(c *gin.Context) {
 		group := c.Query("group")
 		song := c.Query("song")
 
-		// Проверяем, что оба параметра были переданы
 		if group == "" || song == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing required query params: group, song"})
 			return
 		}
 
-		// Ищем группу в mockDB
 		groupMap, ok := mockDB[group]
 		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Group not found"})
 			return
 		}
 
-		// Ищем песню внутри группы
 		detail, ok := groupMap[song]
 		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Song not found"})
 			return
 		}
 
-		// Возвращаем SongDetail
 		c.JSON(http.StatusOK, detail)
 	})
 
-	// Запускаем сервер на порту 8081
 	log.Println("Внешнее API запущено на порту 8081")
 	if err := router.Run(":8081"); err != nil {
 		log.Fatalf("Ошибка запуска сервера: %v", err)
